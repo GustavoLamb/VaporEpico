@@ -1,0 +1,15 @@
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %magenta([%thread]) %highlight(%-5level) %logger{36}.%M - %msg%n"
+
+spring:
+  datasource:
+    username: ${BD_USERNAME}
+    password: ${BD_PASSWORD}
+    url: jdbc:mysql://localhost:3306/vaporepico?serverTimezone=UTC
+  jpa:
+    hibernate:
+      ddl-auto: validate
