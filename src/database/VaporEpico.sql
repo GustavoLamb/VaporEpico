@@ -6,8 +6,8 @@ USE vaporepico;
 CREATE TABLE Usuarios (
     id_usuario BIGINT  AUTO_INCREMENT NOT NULL PRIMARY KEY UNIQUE,
     nome VARCHAR(255)  NOT NULL,
-    data_nascimento DATE ,
-    email VARCHAR(50) ,
+    data_nascimento DATE NOT NULL,
+    email VARCHAR(50) NOT NULL ,
     senha VARCHAR(30)  NOT NULL,
     data_criacao DATE  NOT NULL,
     tipo ENUM('ADIMINISTRADOR', 'COMUM')  NOT NULL
@@ -18,19 +18,18 @@ CREATE TABLE Jogos (
     nome VARCHAR(255) NOT NULL,
     preco DECIMAL(10, 2) NOT NULL,
     descricao VARCHAR(255) NOT NULL,
-    imagem BLOB,
+    imagem LONGBLOB,
     data_lancamento DATE NOT NULL,
     usuario BIGINT 
 );
 
-CREATE TABLE Carrinho (
+CREATE TABLE Carrinhos (
     id_carrinho BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     data_criacao DATE NOT NULL,
     usuario BIGINT 
 );
 
-CREATE TABLE Carrinho_jogo (
-    id_carrinho_jogo BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+CREATE TABLE Carrinhos_jogos (
     jogo BIGINT,
     carrinho BIGINT
 );
@@ -40,17 +39,17 @@ ALTER TABLE Jogos ADD CONSTRAINT FK_Jogos_2
     REFERENCES Usuarios (id_usuario)
     ON DELETE SET NULL;
  
-ALTER TABLE Carrinho ADD CONSTRAINT FK_Carrinho_2
+ALTER TABLE Carrinhos ADD CONSTRAINT FK_Carrinho_2
     FOREIGN KEY (usuario)
     REFERENCES Usuarios (id_usuario)
     ON DELETE CASCADE;
  
-ALTER TABLE Carrinho_jogo ADD CONSTRAINT FK_Carrinho_jogo_1
+ALTER TABLE Carrinhos_jogos ADD CONSTRAINT FK_Carrinho_jogo_1
     FOREIGN KEY (jogo)
     REFERENCES Jogos (id_jogo)
     ON DELETE RESTRICT;
  
-ALTER TABLE Carrinho_jogo ADD CONSTRAINT FK_Carrinho_jogo_2
+ALTER TABLE Carrinhos_jogos ADD CONSTRAINT FK_Carrinho_jogo_2
     FOREIGN KEY (carrinho)
     REFERENCES Carrinho (id_carrinho)
     ON DELETE SET NULL;
