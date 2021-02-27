@@ -1,6 +1,6 @@
 package br.com.ifsul.vaporepico;
 
-import br.com.ifsul.vaporepico.view.LoginScreen;
+import br.com.ifsul.vaporepico.view.PrimeiroFrame;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -11,7 +11,7 @@ import javax.annotation.PostConstruct;
 public class VaporEpicoApplication {
 
    @Autowired
-   private LoginScreen loginScreen;
+   private PrimeiroFrame primeiroFrame;
 
    public static void main(final String[] args) {
       final SpringApplicationBuilder applicationBuilder = new SpringApplicationBuilder(VaporEpicoApplication.class);
@@ -21,6 +21,6 @@ public class VaporEpicoApplication {
 
    @PostConstruct
    public void run() {
-      loginScreen.setVisible(true);
+      primeiroFrame.setVisible(true);
    }
 }
