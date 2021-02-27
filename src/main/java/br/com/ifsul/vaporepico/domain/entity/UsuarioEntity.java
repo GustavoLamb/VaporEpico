@@ -39,8 +39,8 @@ public class UsuarioEntity implements Serializable {
    @Column(name = "data_criacao", nullable = false)
    private LocalDate dataCriacao;
 
-   @Enumerated(EnumType.ORDINAL)
-   @Column(name = "tipo", nullable = false, columnDefinition = "ENUM('ADIMINISTRADOR', 'COMUM')")
+   @Enumerated(EnumType.STRING)
+   @Column(name = "tipo", nullable = false, columnDefinition = "ENUM('ADMINISTRADOR', 'COMUM')")
    private TipoUsuario tipo;
 
    @OneToMany(mappedBy = "usuario")
