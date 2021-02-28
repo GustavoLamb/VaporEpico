@@ -10,7 +10,7 @@ CREATE TABLE Usuarios (
     email VARCHAR(50) NOT NULL ,
     senha VARCHAR(30)  NOT NULL,
     data_criacao DATE  NOT NULL,
-    tipo ENUM('ADIMINISTRADOR', 'COMUM')  NOT NULL
+    tipo ENUM('ADMINISTRADOR', 'COMUM')  NOT NULL
 );
 
 CREATE TABLE Jogos (
@@ -18,7 +18,7 @@ CREATE TABLE Jogos (
     nome VARCHAR(255) NOT NULL,
     preco DECIMAL(10, 2) NOT NULL,
     descricao VARCHAR(255) NOT NULL,
-    imagem LONGBLOB,
+    imagem VARCHAR(255),
     data_lancamento DATE NOT NULL,
     usuario BIGINT 
 );
@@ -51,5 +51,5 @@ ALTER TABLE Carrinhos_jogos ADD CONSTRAINT FK_Carrinho_jogo_1
  
 ALTER TABLE Carrinhos_jogos ADD CONSTRAINT FK_Carrinho_jogo_2
     FOREIGN KEY (carrinho)
-    REFERENCES Carrinho (id_carrinho)
+    REFERENCES Carrinhos (id_carrinho)
     ON DELETE SET NULL;

@@ -36,9 +36,8 @@ public class JogosEntity implements Serializable {
    @Column(name = "data_lancamento", nullable = false)
    private LocalDate dataLancamento;
 
-   @Lob
-   @Column(name = "imagem", length = 1000)
-   private byte[] imagem;
+   @Column(name = "imagem")
+   private String imagem;
 
    @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "usuario", referencedColumnName = "id_usuario")

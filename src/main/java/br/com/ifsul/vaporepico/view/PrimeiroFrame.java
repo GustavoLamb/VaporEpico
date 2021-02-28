@@ -1,6 +1,12 @@
 package br.com.ifsul.vaporepico.view;
 
+import br.com.ifsul.vaporepico.domain.TipoInput;
+import br.com.ifsul.vaporepico.domain.TipoUsuario;
+import br.com.ifsul.vaporepico.domain.entity.UsuarioEntity;
+import br.com.ifsul.vaporepico.domain.entity.UsuarioRepository;
 import br.com.ifsul.vaporepico.view.component.JPanelWithBackground;
+import br.com.ifsul.vaporepico.view.component.Toast;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
@@ -10,12 +16,16 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 import static br.com.ifsul.vaporepico.domain.Cores.BACKGROUND_COLOR;
 import static br.com.ifsul.vaporepico.domain.Fontes.MONTSERRAT_MEDIUM;
-import static br.com.ifsul.vaporepico.domain.TipoInput.COMUM;
 import static br.com.ifsul.vaporepico.domain.TipoInput.SENHA;
 import static br.com.ifsul.vaporepico.utils.CreateComponentUtils.*;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.logging.log4j.util.Strings.isNotBlank;
 
 @Component
 public class PrimeiroFrame extends JFrame {
@@ -29,6 +39,9 @@ public class PrimeiroFrame extends JFrame {
    private static final String EMAIL_IMAGE = "/icons/Email.png";
    private static final String DATA_IMAGE = "/icons/Calendar.png";
    private static final String USER_IMAGE = "/icons/User.png";
+
+   @Autowired
+   private UsuarioRepository repository;
 
    private JLabel registroLabel;
    private JPanel registroContainer;
@@ -92,7 +105,33 @@ public class PrimeiroFrame extends JFrame {
 
       loginButton = createGenericButton(Color.WHITE, 300, 45, "LOGIN");
       loginButton.addActionListener(e -> {
-         // TODO adicionar ação do botão
+         if (validarCamposLogin()) {
+
+            final Optional<UsuarioEntity> optionalUsuario = repository
+                .findByNomeAndSenha(usuarioInput.getText(), senhaInput.getText());
+
+            if (isFalse(optionalUsuario.isPresent())) {
+               final Toast toast = new Toast("Usuário não encontrado",
+                   getLocationOnScreen().x + 580,
+                   getLocationOnScreen().y + 650);
+
+               toast.showToast();
+            } else {
+               final Toast toast = new Toast("Usuário Existe",
+                   getLocationOnScreen().x + 580,
+                   getLocationOnScreen().y + 650);
+
+               toast.showToast();
+
+               //TODO implementar chamada para segundo frame
+            }
+         } else {
+            final Toast toast = new Toast("Preencha todos os campos",
+                getLocationOnScreen().x + 580,
+                getLocationOnScreen().y + 650);
+
+            toast.showToast();
+         }
       });
 
       final Border containerBorder = BorderFactory.createEmptyBorder(50, 0, 0, 0);
@@ -100,7 +139,7 @@ public class PrimeiroFrame extends JFrame {
       buttonContainer.add(loginButton, BorderLayout.NORTH);
       buttonContainer.add(registroContainer, BorderLayout.SOUTH);
 
-      usuarioInput = createGenericInput(COMUM, "Usuário");
+      usuarioInput = createGenericInput(TipoInput.COMUM, "Usuário");
 
       usuarioImage = createGenericInputIcon(USER_IMAGE);
 
@@ -136,14 +175,44 @@ public class PrimeiroFrame extends JFrame {
 
       registrarButton = createGenericButton(Color.WHITE, 300, 45, "REGISTRAR");
       registrarButton.addActionListener(e -> {
-         // TODO adicionar ação do botão
+         if (validarCamposRegistro()) {
+            final UsuarioEntity entity = new UsuarioEntity();
+            entity.setNome(usuarioInput.getText());
+            entity.setEmail(emailInput.getText());
+            entity.setSenha(senhaInput.getText());
+            entity.setDataNascimento(LocalDate.parse(dataInput.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            entity.setDataCriacao(LocalDate.now());
+            entity.setTipo(TipoUsuario.COMUM);
+
+            repository.save(entity);
+
+            final Toast toast = new Toast("Usuário cadastrado",
+                getLocationOnScreen().x + 580,
+                getLocationOnScreen().y + 650);
+
+            toast.showToast();
+
+            background.remove(form);
+            background.remove(flecha);
+            try {
+               loginUI();
+            } catch (final Exception exception) {
+               exception.printStackTrace();
+            }
+         } else {
+            final Toast toast = new Toast("Erro no registro",
+                getLocationOnScreen().x + 580,
+                getLocationOnScreen().y + 650);
+
+            toast.showToast();
+         }
       });
 
       final Border containerBorder = BorderFactory.createEmptyBorder(10, 0, 0, 0);
       buttonContainer = createGenericContainer(containerBorder, BACKGROUND_COLOR, 300, 115);
       buttonContainer.add(registrarButton, BorderLayout.NORTH);
 
-      usuarioInput = createGenericInput(COMUM, "Usuário");
+      usuarioInput = createGenericInput(TipoInput.COMUM, "Usuário");
       usuarioImage = createGenericInputIcon(USER_IMAGE);
 
       final Border inputContainerBorder = BorderFactory.createLineBorder(Color.WHITE);
@@ -155,7 +224,7 @@ public class PrimeiroFrame extends JFrame {
       usuarioConstraints.gridx = 0;
       usuarioConstraints.gridy = 0;
 
-      emailInput = createGenericInput(COMUM, "Email");
+      emailInput = createGenericInput(TipoInput.COMUM, "Email");
       emailImage = createGenericInputIcon(EMAIL_IMAGE);
 
       emailContainer = createGenericContainer(inputContainerBorder, BACKGROUND_COLOR, 300, 45);
@@ -166,7 +235,7 @@ public class PrimeiroFrame extends JFrame {
       emailConstraints.gridx = 0;
       emailConstraints.gridy = 1;
 
-      dataInput = createGenericInput(COMUM, "Data de nacimento");
+      dataInput = createGenericInput(TipoInput.COMUM, "Data de nacimento");
       dataImage = createGenericInputIcon(DATA_IMAGE);
 
       dataContainer = createGenericContainer(inputContainerBorder, BACKGROUND_COLOR, 300, 45);
@@ -257,6 +326,20 @@ public class PrimeiroFrame extends JFrame {
       label.setHorizontalAlignment(0);
 
       return label;
+   }
+
+   private Boolean validarCamposRegistro() {
+      return isNotBlank(usuarioInput.getText())
+          && isNotBlank(usuarioInput.getText())
+          && isNotBlank(senhaInput.getText())
+          && isNotBlank(confirmarSenhaInput.getText())
+          && isNotBlank(dataInput.getText())
+          && senhaInput.getText().equals(confirmarSenhaInput.getText());
+   }
+
+   private Boolean validarCamposLogin() {
+      return isNotBlank(usuarioInput.getText())
+          && isNotBlank(senhaInput.getText());
    }
 
    private void refresh() {
