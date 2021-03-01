@@ -28,7 +28,7 @@ import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 
 @Component
-public class PrimeiroFrame extends JFrame {
+public class AcessoFrame extends JFrame {
    private static final long serialVersionUID = -6737522500686622909L;
 
    private static final String VAPOR_EPICO = "VaporEpico";
@@ -42,6 +42,9 @@ public class PrimeiroFrame extends JFrame {
 
    @Autowired
    private UsuarioRepository repository;
+
+   @Autowired
+   private LojaFrame lojaFrame;
 
    private JLabel registroLabel;
    private JPanel registroContainer;
@@ -69,7 +72,7 @@ public class PrimeiroFrame extends JFrame {
    private JPanel form;
    private JPanel background;
 
-   public PrimeiroFrame() throws IOException {
+   public AcessoFrame() throws IOException {
       super(VAPOR_EPICO);
 
       background = new JPanelWithBackground(getClass().getResourceAsStream(BACKGROUND_TEMPLATE));
@@ -123,7 +126,12 @@ public class PrimeiroFrame extends JFrame {
 
                toast.showToast();
 
-               //TODO implementar chamada para segundo frame
+               try {
+                  lojaFrame.showUI(optionalUsuario.map(UsuarioEntity::getId).orElse(null));
+                  this.dispose();
+               } catch (final IOException ioException) {
+                  ioException.printStackTrace();
+               }
             }
          } else {
             final Toast toast = new Toast("Preencha todos os campos",

@@ -42,19 +42,6 @@ public class JPanelGameCard extends JPanel {
       this.setLayout(new BorderLayout());
       this.setBackground(TRANSPARENT);
 
-      this.addMouseListener(new MouseAdapter() {
-         @Override
-         public void mouseClicked(final MouseEvent e) {
-            final Toast toast = new Toast("Jogo comprado",
-                mainFrame.getX() + 580,
-                mainFrame.getY() + 650);
-
-            toast.showToast();
-
-            //TODO abrir tela com descrição do jogo
-         }
-      });
-
       this.setPreferredSize(new Dimension(378, 247));
       this.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
       this.add(gameImage, BorderLayout.NORTH);
