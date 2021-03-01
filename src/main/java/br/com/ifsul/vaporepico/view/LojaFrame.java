@@ -4,11 +4,12 @@ import br.com.ifsul.vaporepico.domain.Cores;
 import br.com.ifsul.vaporepico.domain.TipoInput;
 import br.com.ifsul.vaporepico.domain.entity.JogosEntity;
 import br.com.ifsul.vaporepico.domain.entity.JogosRepository;
+import br.com.ifsul.vaporepico.domain.entity.UsuarioRepository;
 import br.com.ifsul.vaporepico.view.component.JPanelGameCard;
 import br.com.ifsul.vaporepico.view.component.JPanelWithBackground;
+import br.com.ifsul.vaporepico.view.component.Toast;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -19,6 +20,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.Transient;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +28,10 @@ import java.util.List;
 import static br.com.ifsul.vaporepico.domain.Fontes.MONTSERRAT;
 import static br.com.ifsul.vaporepico.utils.CreateComponentUtils.*;
 import static java.lang.String.format;
+import static java.util.Objects.isNull;
 
-@Component
-public class TerceiroFrame extends JFrame {
+@org.springframework.stereotype.Component
+public class LojaFrame extends JFrame {
 
    private static final long serialVersionUID = 6789098987073204340L;
 
@@ -39,8 +42,12 @@ public class TerceiroFrame extends JFrame {
    private static final String LUPA = "/icons/Search.png";
 
    @Autowired
-   private JogosRepository repository;
+   private JogosRepository jogosRepository;
 
+   @Autowired
+   private UsuarioRepository usuarioRepository;
+
+   private Long userId;
    private JTextField searchInput;
    private JLabel searchImage;
    private JLabel carrinhoLabel;
@@ -56,21 +63,20 @@ public class TerceiroFrame extends JFrame {
    private JPanel topPanel;
    private JPanel bottomPanel;
    private JPanel background;
+   private LojaFrame context = this;
 
-   public TerceiroFrame() throws IOException {
+   public LojaFrame() throws IOException {
       super(VAPOR_EPICO);
+   }
+
+   public void showUI(final Long idUsuario) throws IOException {
+      userId = idUsuario;
 
       bibliotecaLabel = createGenericTextLabel("BIBLIOTECA", Color.WHITE, MONTSERRAT);
 
       flecha = new JLabel();
       flecha.setIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream(FLECHA_IMAGE))));
       flecha.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 40));
-      flecha.addMouseListener(new MouseAdapter() {
-         @Override
-         public void mouseClicked(final MouseEvent e) {
-            //TODO abir segundo frame
-         }
-      });
 
       final Border simpleBorder = new EmptyBorder(10, 10, 10, 10);
       bibliotecaContainer = createGenericContainer(simpleBorder, Cores.BACKGROUND_PANNEL, 249, 50);
@@ -92,7 +98,7 @@ public class TerceiroFrame extends JFrame {
             removeComponents(topGamePanel);
             removeComponents(centerGamePanel);
 
-            final Iterable<JogosEntity> iterable = repository.findAllByNomeLike(searchInput.getText());
+            final Iterable<JogosEntity> iterable = jogosRepository.findAllByNomeLike(searchInput.getText());
             createGameCards(iterable);
          }
       });
@@ -108,6 +114,18 @@ public class TerceiroFrame extends JFrame {
 
       carrinhoLabel = new JLabel();
       carrinhoLabel.setIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream(CESTA))));
+      carrinhoLabel.addMouseListener(new MouseAdapter() {
+
+         @SneakyThrows
+         @Override
+         public void mouseClicked(final MouseEvent e) {
+            removeComponents(topGamePanel);
+            removeComponents(centerGamePanel);
+
+            final Iterable<JogosEntity> iterable = jogosRepository.findAll();
+            createGameCards(iterable);
+         }
+      });
 
       carrinhoContainer = createGenericContainer(null, Cores.BACKGROUND_PANNEL, 50, 50);
       carrinhoContainer.add(carrinhoLabel, BorderLayout.WEST);
@@ -150,25 +168,55 @@ public class TerceiroFrame extends JFrame {
          @SneakyThrows
          @Override
          public void componentShown(final ComponentEvent e) {
-            createGameCards(repository.findAll());
+            createGameCards(jogosRepository.findAll());
          }
       });
 
       this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      this.setResizable(false);
       this.setContentPane(background);
       this.pack();
-      this.setResizable(false);
+      this.setVisible(true);
    }
 
    private void createGameCards(final Iterable<JogosEntity> iterable) throws IOException {
       final List<JogosEntity> jogosList = new ArrayList<JogosEntity>();
-      iterable.forEach(jogosList::add);
+      iterable.forEach(jogo -> {
+         if (isNull(jogo.getUsuario())) {
+            jogosList.add(jogo);
+         }
+      });
       int row = 0;
 
       for (final JogosEntity jogo : jogosList) {
 
          final JPanel gameCard = new JPanelGameCard(format("/icons/game/%s", jogo.getImagem()),
              jogo.getPreco(), jogo.getId(), this);
+
+
+         gameCard.addMouseListener(new MouseAdapter() {
+
+            @Transient
+            @Override
+            public void mouseClicked(final MouseEvent e) {
+               usuarioRepository.findById(userId)
+                   .ifPresent(usuario -> {
+                      jogo.setUsuario(usuario);
+                      jogosRepository.save(jogo);
+                   });
+
+               final Toast toast = new Toast("Jogo comprado",
+                   getLocationOnScreen().x + 580,
+                   getLocationOnScreen().y + 650);
+
+               toast.showToast();
+
+               topGamePanel.remove(e.getComponent());
+               centerGamePanel.remove(e.getComponent());
+               context.refresh();
+            }
+         });
+
          final GridBagConstraints gameCardConstraints = new GridBagConstraints();
          gameCardConstraints.fill = GridBagConstraints.HORIZONTAL;
          gameCardConstraints.gridx = row;
@@ -200,6 +248,7 @@ public class TerceiroFrame extends JFrame {
    }
 
    private void refresh() {
+      this.setContentPane(background);
       this.invalidate();
       this.validate();
    }
