@@ -51,6 +51,9 @@ public class LojaFrame extends JFrame {
    @Autowired
    private JogosFrame jogosFrame;
 
+   @Autowired
+   private UsuarioFrame usuarioFrame;
+
    private Long userId;
    private JLabel plus;
    private JTextField searchInput;
@@ -82,6 +85,14 @@ public class LojaFrame extends JFrame {
       flecha = new JLabel();
       flecha.setIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream(FLECHA_IMAGE))));
       flecha.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 40));
+      flecha.addMouseListener(new MouseAdapter() {
+         @SneakyThrows
+         @Override
+         public void mouseClicked(final MouseEvent e) {
+            usuarioFrame.showUI(userId);
+            context.dispose();
+         }
+      });
 
       final Border simpleBorder = new EmptyBorder(10, 10, 10, 10);
       bibliotecaContainer = createGenericContainer(simpleBorder, Cores.BACKGROUND_PANNEL, 249, 50);

@@ -45,4 +45,9 @@ public class JogosEntity implements Serializable {
 
    @ManyToMany(mappedBy = "jogosCarrinho")
    private List<CarrinhoEntity> carrinhosJogo;
+
+   @Override
+   public String toString() {
+      return nome;
+   }
 }
