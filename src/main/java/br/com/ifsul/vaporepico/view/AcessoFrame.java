@@ -338,7 +338,6 @@ public class AcessoFrame extends JFrame {
 
    private Boolean validarCamposRegistro() {
       return isNotBlank(usuarioInput.getText())
-          && isNotBlank(usuarioInput.getText())
           && isNotBlank(senhaInput.getText())
           && isNotBlank(confirmarSenhaInput.getText())
           && isNotBlank(dataInput.getText())

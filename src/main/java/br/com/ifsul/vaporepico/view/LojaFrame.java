@@ -40,6 +40,7 @@ public class LojaFrame extends JFrame {
    private static final String FLECHA_IMAGE = "/icons/Flecha.png";
    private static final String CESTA = "/icons/Cesta.png";
    private static final String LUPA = "/icons/Search.png";
+   private static final String PLUS = "/icons/Plus.png";
 
    @Autowired
    private JogosRepository jogosRepository;
@@ -47,7 +48,14 @@ public class LojaFrame extends JFrame {
    @Autowired
    private UsuarioRepository usuarioRepository;
 
+   @Autowired
+   private JogosFrame jogosFrame;
+
+   @Autowired
+   private UsuarioFrame usuarioFrame;
+
    private Long userId;
+   private JLabel plus;
    private JTextField searchInput;
    private JLabel searchImage;
    private JLabel carrinhoLabel;
@@ -77,6 +85,14 @@ public class LojaFrame extends JFrame {
       flecha = new JLabel();
       flecha.setIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream(FLECHA_IMAGE))));
       flecha.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 40));
+      flecha.addMouseListener(new MouseAdapter() {
+         @SneakyThrows
+         @Override
+         public void mouseClicked(final MouseEvent e) {
+            usuarioFrame.showUI(userId);
+            context.dispose();
+         }
+      });
 
       final Border simpleBorder = new EmptyBorder(10, 10, 10, 10);
       bibliotecaContainer = createGenericContainer(simpleBorder, Cores.BACKGROUND_PANNEL, 249, 50);
@@ -152,7 +168,21 @@ public class LojaFrame extends JFrame {
       centerPanel.add(topGamePanel, BorderLayout.NORTH);
       centerPanel.add(centerGamePanel, BorderLayout.CENTER);
 
-      bottomPanel = createGenericContainer(null, null, 1214, 30);
+      plus = new JLabel();
+      plus.setIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream(PLUS))));
+      plus.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+
+      plus.addMouseListener(new MouseAdapter() {
+         @SneakyThrows
+         @Override
+         public void mouseClicked(final MouseEvent e) {
+            jogosFrame.showUI(userId);
+            context.dispose();
+         }
+      });
+
+      bottomPanel = createGenericContainer(null, null, 1214, 50);
+      bottomPanel.add(plus, BorderLayout.EAST);
 
       background = new JPanelWithBackground(getClass().getResourceAsStream(BACKGROUND_TEMPLATE));
       background.setLayout(new BorderLayout());
@@ -168,6 +198,9 @@ public class LojaFrame extends JFrame {
          @SneakyThrows
          @Override
          public void componentShown(final ComponentEvent e) {
+            removeComponents(topGamePanel);
+            removeComponents(centerGamePanel);
+
             createGameCards(jogosRepository.findAll());
          }
       });
